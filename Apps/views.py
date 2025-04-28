@@ -44,9 +44,6 @@ from .models import User  # Assuming you have a User model for MongoDB
 from pymongo import MongoClient
 import json
 import datetime
-from pymongo import MongoClient
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -434,87 +431,6 @@ def redirect_url(request, short_code):
         return render(request, 'Apps/shortener.html', {'error': 'Invalid short URL'})
 
 
-# import os
-# import re
-# import yt_dlp
-# from django.shortcuts import render, redirect
-# from django.http import HttpResponse
-
-# # Helper function to sanitize the file name (removes illegal characters)
-# def sanitize_filename(name):
-#     return re.sub(r'[\\/*?:"<>|]', "", name)
-
-# def download_video(request):
-#     if request.method == 'POST':
-#         video_url = request.POST.get('video_url')
-
-#         if not video_url:
-#             return HttpResponse("Please provide a valid video URL.", status=400)
-
-#         try:
-#             # Specify the Downloads folder path
-#             downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-
-#             if not os.path.exists(downloads_folder):
-#                 os.makedirs(downloads_folder)
-
-#             # Define options for yt-dlp
-#             ydl_opts = {
-#                 'quiet': True,
-#                 'noplaylist': True,
-#                 'outtmpl': os.path.join(downloads_folder, '%(title).80s.%(ext)s'),  # Sanitize title length
-#                 'format': 'bestaudio/bestvideo',  # Best video and best audio, combined
-#                 'merge_output_format': 'mp4',  # Ensure the output is mp4
-#             }
-
-#             # Use yt-dlp to get video info and download
-#             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-#                 # Extract info, including available formats
-#                 info_dict = ydl.extract_info(video_url, download=False)
-
-#                 # Get the available formats
-#                 formats = info_dict.get('formats', [])
-                
-#                 # Choose the best format: Combine best video + best audio
-#                 best_format = None
-#                 for fmt in formats:
-#                     if fmt['vcodec'] != 'none' and fmt['acodec'] != 'none':
-#                         best_format = fmt
-#                         break  # Select first valid combination
-
-#                 if best_format is None:
-#                     best_format = max(formats, key=lambda x: x['height'] if 'height' in x else 0)
-
-#                 # Download the selected format
-#                 ydl_opts['format'] = best_format['format_id']  # Set the selected format
-
-#                 # Proceed with the download
-#                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-#                     info_dict = ydl.extract_info(video_url, download=True)
-#                     video_title = sanitize_filename(info_dict.get('title', 'video'))
-#                     video_duration = info_dict.get('duration', 0)
-#                     video_description = info_dict.get('description', 'No description available.')
-
-#                     # Determine file name and path
-#                     file_ext = info_dict.get('ext', 'mp4')
-#                     file_name = f"{video_title}.{file_ext}"
-#                     downloaded_file_path = os.path.join(downloads_folder, file_name)
-
-#             # Format duration into minutes and seconds
-#             duration_minutes = video_duration // 60
-#             duration_seconds = video_duration % 60
-
-#             # Pass data to success page
-#             redirect_url = f'/downloadsucess/?file_name={file_name}&video_title={video_title}&video_duration={duration_minutes} minutes {duration_seconds} seconds&video_description={video_description}&downloaded_file_path={downloaded_file_path}'
-#             return redirect(redirect_url)
-
-#         except Exception as e:
-#             # If any error occurs during download
-#             return HttpResponse(f"Error downloading video: {str(e)}", status=500)
-
-#     return render(request, 'Apps/download_video.html')
-
-
 import os
 import re
 import yt_dlp
@@ -745,3 +661,299 @@ def convert_images_to_pdf(image_paths):
     
     os.remove(pdf_path) 
     return response
+
+
+
+
+
+#janani Space ####
+#mp3tomp4
+
+
+
+def music(request):
+    """
+    Render the initial form for MP4 to MP3 conversion.
+    """
+    return render(request, 'Apps/mp4tomp3.html')
+
+def convert(request):
+    """
+    Handle MP4 to MP3 file conversion.
+    """
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('mp4_file')  # Get the uploaded MP4 file
+
+        if uploaded_file:
+            # Save the uploaded MP4 file to the media directory
+            input_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.name)
+            with open(input_path, 'wb') as f:
+                for chunk in uploaded_file.chunks():
+                    f.write(chunk)
+
+            # Define the output MP3 file path
+            output_filename = f"{os.path.splitext(uploaded_file.name)[0]}  _WOW.mp3"
+            output_path = os.path.join(settings.MEDIA_ROOT, output_filename)
+
+            try:
+                # Convert MP4 to MP3 using pydub
+                audio = AudioSegment.from_file(input_path, format="mp4")
+                audio.export(output_path, format="mp3")
+            except Exception as e:
+                # Handle errors during conversion
+                return HttpResponse(f"Error during conversion: {e}", status=500)
+
+            # Serve the MP3 file as a downloadable response
+            with open(output_path, 'rb') as mp3_file:
+                response = HttpResponse(mp3_file.read(), content_type='audio/mpeg')
+                response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+                return response
+
+        else:
+            # Handle case when no file is uploaded
+            return HttpResponse("No file was uploaded.", status=400)
+
+    # Render the form if the request method is not POST
+    return render(request, 'Apps/mp4tomp3.html')
+    
+# tick tac 
+def tick_tac(request):
+   return render(request, 'Apps/ticktac.html')
+
+#puzzle 
+import random
+from django.shortcuts import render
+
+def puzzle_game_view(request):
+    grid_size = 3
+    piece_width = 100
+    piece_height = 100
+
+    # Define available images
+    images = [
+        '/static/images/logo.png',
+        '/static/images/chotta.jpg',
+        '/static/images/doreman.jpg',
+
+
+        
+    ]
+    selected_image = random.choice(images)
+
+    # Create puzzle pieces
+    pieces = list(range(grid_size * grid_size))
+    random.shuffle(pieces)
+
+    piece_positions = []
+    for piece in pieces:
+        if piece == 0:
+            piece_positions.append(None)  # Empty space
+        else:
+            x = (piece % grid_size) * piece_width
+            y = (piece // grid_size) * piece_height
+            piece_positions.append(f"-{x}px -{y}px")
+
+    # Combine pieces and positions
+    puzzle_pieces = list(zip(pieces, piece_positions))
+
+    context = {
+        'grid_size': grid_size,
+        'puzzle_pieces': puzzle_pieces,
+        'piece_width': piece_width,
+        'piece_height': piece_height,
+        'image_url': selected_image,
+    }
+    return render(request, 'Apps/puzzle_game.html', context)
+
+# brain reaction
+def brain_game_view(request):
+    return render(request, 'Apps/brain.html')
+
+#guess the number
+from django.template.loader import get_template
+from django.http import HttpResponse
+
+def guess_number(request):
+    try:
+        template = get_template('Apps/number.html')  # Try to load the template
+        return render(request, 'Apps/number.html')
+    except Exception as e:
+        return HttpResponse(f"Error loading template: {e}")
+
+#sudoko game
+def generate_sudoku():
+    import random
+    base = 3
+    side = base * base
+
+    def pattern(r, c):
+        return (base * (r % base) + r // base + c) % side
+
+    def shuffle(s):
+        return random.sample(s, len(s))
+
+    rows = [g * base + r for g in shuffle(range(base)) for r in shuffle(range(base))]
+    cols = [g * base + c for g in shuffle(range(base)) for c in shuffle(range(base))]
+    nums = shuffle(range(1, base * base + 1))
+
+    board = [[nums[pattern(r, c)] for c in cols] for r in rows]
+
+    # Remove some numbers to make the puzzle
+    puzzle = [[board[r][c] if random.random() > 0.5 else 0 for c in range(side)] for r in range(side)]
+    return puzzle, board
+
+def sudoku_view(request):
+    if request.method == "POST":
+        # Handle submission (not implemented yet)
+        pass
+    else:
+        puzzle, solution = generate_sudoku()
+        return render(request, 'Apps/sudoko.html', {'puzzle': puzzle, 'solution': solution})
+
+#dictionary 
+import requests
+from django.shortcuts import render
+
+def home(request):
+    meaning = None
+    error = None
+    word = None
+
+    if request.method == "POST":
+        word = request.POST.get("word")
+        api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            data = response.json()
+            meaning = data[0]  # Extract the first result
+        elif response.status_code == 404:
+            error = f"No results found for '{word}'."
+        else:
+            error = f"Error: {response.status_code} - {response.reason}"
+
+    return render(request, "Apps/dictionary.html", {"meaning": meaning, "error": error, "word": word})
+    
+#prompt generator
+import openai
+from django.shortcuts import render
+
+# Add your OpenAI API key
+
+#password generator
+import random
+import string
+from django.shortcuts import render
+
+def generate_password(request):
+    length = int(request.GET.get("length", 12))  # Default length is 12
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = "".join(random.choice(characters) for _ in range(length))
+    
+    return render(request, "Apps/password.html", {"password": password})
+
+#color picker
+from django.http import JsonResponse
+from django.shortcuts import render
+
+def color_picker(request):
+    if request.method == "POST":
+        selected_color = request.POST.get("color", "#000000")
+        return JsonResponse({"color": selected_color})
+
+    return render(request, "Apps/color_picker.html")
+
+#qr generator
+import qrcode
+from django.shortcuts import render
+from django import forms
+from io import BytesIO
+import base64
+
+# Form for user input
+class QRForm(forms.Form):
+    data = forms.CharField(label='Enter Data', max_length=100)
+
+def generate_qr(request):
+    qr_code_img = None
+
+    if request.method == "POST":
+        form = QRForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data['data']  # Get the user input
+
+            # Generate QR code
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(data)
+            qr.make(fit=True)
+
+            # Create the image from the QR code
+            img = qr.make_image(fill='black', back_color='white')
+
+            # Save the image to an in-memory file (BytesIO)
+            img_io = BytesIO()
+            img.save(img_io, 'PNG')
+            img_io.seek(0)
+
+            # Base64 encode the image
+            img_base64 = base64.b64encode(img_io.read()).decode('utf-8')
+
+            # Return the base64 string to the template
+            qr_code_img = img_base64
+
+        else:
+            qr_code_img = None
+    else:
+        form = QRForm()
+
+    return render(request, 'Apps/qrgenerator.html', {'form': form, 'qr_code_img': qr_code_img})
+
+
+#notes or to-do list
+import threading
+import time
+from django.shortcuts import render, redirect
+from django.utils.timezone import now
+from .models import Task
+
+# Function to check for tasks due and print notification
+def check_due_tasks():
+    while True:
+        current_time = now()
+        due_tasks = Task.objects.filter(due_time__lte=current_time, completed=False)
+
+        for task in due_tasks:
+            print(f"🔔 Reminder: Task '{task.title}' is due!")  # Console Notification
+            # You can add code to display in the UI
+
+        time.sleep(30)  # Check every 30 seconds
+
+# Run background thread for notifications
+thread = threading.Thread(target=check_due_tasks, daemon=True)
+thread.start()
+
+# View to display tasks
+def todo_list(request):
+    tasks = Task.objects.all().order_by('due_time')  # Show tasks in order of time
+    return render(request, 'Apps/notes.html', {'tasks': tasks})
+
+# View to add a new task
+def add_task(request):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        due_time = request.POST.get('due_time')
+        
+        Task.objects.create(title=title, due_time=due_time)
+        return redirect('todo_list')
+
+    return render(request, 'Apps/add_task.html')
+
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task.delete()
+    return redirect("todo_list")  # Redirect to your main to-do list page

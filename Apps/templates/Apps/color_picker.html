@@ -1,119 +1,57 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Picker</title>
-    
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 40px;
-        }
-        #color-box {
-            width: 200px;
-            height: 200px;
-            margin: 20px auto;
-            border-radius: 10px;
-            border: 2px solid #333;
-        }
-        input[type="color"] {
-            margin-top: 20px;
-        }
-        #color-code {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-
-    <h2>Select a Color</h2>
-
-    <input type="color" id="colorInput" value="#ff0000">
-    <div id="color-box" style="background-color: #ff0000;"></div>
-    <div id="color-code">Selected Color: #ff0000</div>
-
-    <script>
-        $(document).ready(function() {
-            $("#colorInput").on("input", function() {
-                let selectedColor = $(this).val();
-                
-                // Update the color box and text
-                $("#color-box").css("background-color", selectedColor);
-                $("#color-code").text("Selected Color: " + selectedColor);
-
-                // Send AJAX request to Django view
-                $.ajax({
-                    type: "POST",
-                    url: "",  // Same URL as the current page
-                    data: {
-                        color: selectedColor,
-                        csrfmiddlewaretoken: "{{ csrf_token }}"
-                    },
-                    success: function(response) {
-                        console.log("Color saved:", response.color);
-                    },
-                    error: function(xhr) {
-                        console.log("Error:", xhr.responseText);
-                    }
-                });
-            });
-        });
-    </script>
-
-</body>
-</html> -->
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Color Picker</title>
     <script>
-        function updateColor() {
-            let selectedColor = document.getElementById("colorInput").value;
+      function updateColor() {
+        let selectedColor = document.getElementById("colorInput").value;
+        document.getElementById("colorBox").style.backgroundColor =
+          selectedColor; // Instant color change
+        document.getElementById("colorCode").innerText = selectedColor; // Update color code
 
-            // Send color to Django view using Fetch API (AJAX)
-            fetch("", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRFToken": getCSRFToken()
-                },
-                body: "color=" + encodeURIComponent(selectedColor)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("colorBox").style.backgroundColor = data.color;
-            })
-            .catch(error => console.error("Error:", error));
-        }
+        // Send color to Django view using Fetch API (AJAX)
+        fetch("", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCSRFToken(),
+          },
+          body: "color=" + encodeURIComponent(selectedColor),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("colorBox").style.backgroundColor =
+              data.color;
+            console.log("Server Response:", data);
+          })
+          .catch((error) => console.error("Error:", error));
+      }
 
-        // Function to get CSRF token
-        function getCSRFToken() {
-            return document.querySelector("[name=csrfmiddlewaretoken]").value;
-        }
+      // Function to get CSRF token
+      function getCSRFToken() {
+        return document.querySelector("[name=csrfmiddlewaretoken]").value;
+      }
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <h2>Select a Color</h2>
     <form onsubmit="event.preventDefault(); updateColor();">
-        {% csrf_token %}
-        <input type="color" id="colorInput" name="color" value="#000000">
-        <button type="submit">Apply</button>
+      {% csrf_token %}
+      <input type="color" id="colorInput" name="color" value="#000000" />
+      <button type="submit">Apply</button>
     </form>
 
     <h3>Selected Color:</h3>
-    <div id="colorBox" style="width: 100px; height: 100px; background-color: #000000; border: 1px solid #000;"></div>
-</body>
+    <div
+      id="colorBox"
+      style="
+        width: 100px;
+        height: 100px;
+        background-color: #000000;
+        border: 1px solid #000;
+      "
+    ></div>
+  </body>
 </html>
