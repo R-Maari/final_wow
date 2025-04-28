@@ -839,25 +839,6 @@ import openai
 from django.shortcuts import render
 
 # Add your OpenAI API key
-openai.api_key = "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"
-
-def generate_image(request):
-    image_url = None
-    error_message = None
-
-    if request.method == "POST":
-        prompt = request.POST.get("prompt")
-        try:
-            response = openai.Image.create(
-                prompt=prompt,
-                n=1,
-                size="1024x1024"
-            )
-            image_url = response['data'][0]['url']
-        except Exception as e:
-            error_message = f"Error generating image: {e}"
-
-    return render(request, 'Apps/generator.html', {'image_url': image_url, 'error_message': error_message})
 
 #password generator
 import random
