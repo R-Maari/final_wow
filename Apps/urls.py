@@ -23,4 +23,21 @@ urlpatterns = [
     path('pdfmaker/',views.upload_file,name="upload_file"),
     path('shorten/', views.shorten_url, name='shorten_url'),
     path('<str:short_code>', views.redirect_url, name='redirect_url'),
+    path('music/', views.music, name='music'),
+    path('convert/', views.convert, name='convert'),
+    path('tick_tac/', views.tick_tac, name='tick_tac'), 
+    path('puzzle/', views.puzzle_game_view, name='puzzle_game'),
+    path('brain/', views.brain_game_view, name='brain_game'),
+    path('guess/', views.guess_number, name='guess_number'),
+    path('sudoku/', views.sudoku_view, name='sudoku'),
+    path("dictionary/", views.home, name="dictionary"),
+    path("imagegenerator/",views.generate_image, name='generate_image'),
+    path('qrgenerator/', views.generate_qr, name='generate_qr'),
+    path('generate-password/',views.generate_password, name='generate_password'),
+    path('color_picker/', views.color_picker, name='color_picker'),  
+    path("to-do-list/",views.todo_list, name="todo_list"),
+    path("add/",views.add_task, name="add_task"),
+     path("delete/<int:task_id>/",views.delete_task, name="delete_task"),
+  ]
+
 ] 
